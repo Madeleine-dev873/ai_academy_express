@@ -22,6 +22,7 @@
 <li><a href="/subscribers">Abonnés</a></li>
 <% if (loggedIn) { %>
 <li><a href="/users">Utilisateurs</a></li>
+
 <li>
 <a href="/users/<%= currentUser._id %>">
 Mon Profil
@@ -35,6 +36,7 @@ Mon Profil
 <li><a href="/signup">S'inscrire</a></li>
 <% } %>
 <li><a href="/contact">Contact</a></li>
+<li><a href="/api/documentation">API Docs</a></li>
 </ul>
 </nav>
 </header>

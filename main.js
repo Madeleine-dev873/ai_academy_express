@@ -1,3 +1,4 @@
+// Imports
 const express = require("express");
 const layouts = require("express-ejs-layouts");
 const mongoose = require("mongoose");
@@ -6,25 +7,12 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
+const httpStatus = require("http-status-codes");
+const routes = require("./routes/index");
+const subscribersRoutes = require('./routes/subscribersRoutes');
 
-const homeController = require("./controllers/homeController");
-const errorController = require("./controllers/errorController");
-const subscribersController = require("./controllers/subscribersController");
-const usersController = require("./Controllers/usersController");
-const coursesController = require("./controllers/coursesController");
-const authController = require("./Controllers/authController");
-
+// Initialisation de l'application Express
 const app = express();
-
-// Configuration de la connexion à MongoDB
-mongoose.connect("mongodb://localhost:27017/ai_academy", {
-  useNewUrlParser: true
-});
-
-const db = mongoose.connection;
-db.once("open", () => {
-  console.log("Connexion réussie à MongoDB en utilisant Mongoose!");
-});
 
 // Configuration de l'application
 app.set("port", process.env.PORT || 3000);
@@ -33,6 +21,8 @@ app.use(express.static("public"));
 app.use(layouts);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Middleware de méthode HTTP
 app.use(methodOverride("_method", {
   methods: ["POST", "GET"]
 }));
@@ -59,7 +49,7 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// Middleware global
+// Middleware pour rendre les variables locales disponibles dans toutes les vues
 app.use((req, res, next) => {
   res.locals.flashMessages = req.flash();
   res.locals.loggedIn = req.isAuthenticated();
@@ -67,54 +57,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes d'authentification
-app.get("/login", authController.login);
-app.post("/login", authController.authenticate);
-app.get("/logout", authController.logout, usersController.redirectView);
-app.get("/signup", authController.signup);
-app.post("/signup", authController.register, usersController.redirectView);
+// Utilisation des routes
+app.use("/", routes);
+app.use('/subscribers', subscribersRoutes); // Déplacer cette ligne après l'initialisation de 'app'
 
-// Routes protégées
-app.use("/users", authController.ensureLoggedIn);
-app.use("/courses/new", authController.ensureLoggedIn);
-app.use("/courses/:id/edit", authController.ensureLoggedIn);
-
-// Routes générales
-app.get("/", homeController.index);
-app.get("/about", homeController.about);
-app.get("/courses", homeController.courses);
-app.get("/contact", homeController.contact);
-app.post("/contact", homeController.processContact);
-
-// Routes pour les abonnés
-app.get("/subscribers", subscribersController.getAllSubscribers);
-app.get("/subscribers/new", subscribersController.getSubscriptionPage);
-app.post("/subscribers/create", subscribersController.saveSubscriber);
-app.get("/subscribers/:id", subscribersController.show);
-
-// Routes pour les utilisateurs
-app.get("/users", usersController.index, usersController.indexView);
-app.get("/users/new", usersController.new);
-app.post("/users/create", usersController.create, usersController.redirectView);
-app.get("/users/:id", usersController.show, usersController.showView);
-app.get("/users/:id/edit", usersController.edit);
-app.put("/users/:id/update", usersController.update, usersController.redirectView);
-app.delete("/users/:id/delete", usersController.delete, usersController.redirectView);
-
-// Routes pour les cours
-app.get("/courses", coursesController.index, coursesController.indexView);
-app.get("/courses/new", coursesController.new);
-app.post("/courses/create", coursesController.create, coursesController.redirectView);
-app.get("/courses/:id", coursesController.show, coursesController.showView);
-app.get("/courses/:id/edit", coursesController.edit);
-app.put("/courses/:id/update", coursesController.update, coursesController.redirectView);
-app.delete("/courses/:id/delete", coursesController.delete, coursesController.redirectView);
-
-// Gestion des erreurs
-app.use(errorController.pageNotFound);
-
-// Lancer le serveur
-const port = app.get("port");
-app.listen(port, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
+// Configuration de la connexion à MongoDB
+mongoose.connect("mongodb://localhost:27017/ai_academy", { useNewUrlParser: true });
+const db = mongoose.connection;
+db.once("open", () => {
+  console.log("Connexion réussie à MongoDB en utilisant Mongoose!");
 });
+
+// Démarrage du serveur
+app.listen(app.get("port"), () => {
+  console.log(`Le serveur a démarré et écoute sur le port: ${app.get("port")}`);
+  console.log(`Serveur accessible à l'adresse: http://localhost:${app.get("port")}`);
+});
+
+

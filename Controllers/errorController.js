@@ -18,8 +18,8 @@ errorCode: errorCode,
 message: "Erreur interne du serveur"
 });
 };
-// Controllers/errorController.js
+// controllers/errorController.js
+
 module.exports.pageNotFound = (req, res, next) => {
-    res.status(404).render("404");  // Ou toute autre page d'erreur que tu souhaites afficher
-  };
-  
+  res.status(404).render('404');  // Assure-toi que la vue '404.ejs' existe bien
+};
